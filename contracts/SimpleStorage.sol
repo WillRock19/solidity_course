@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.0;
+pragma solidity >=0.6.0;
 
 contract SimpleStorage
 {
@@ -40,5 +40,5 @@ contract SimpleStorage
     function addPersonWithBrakets(string memory _name, uint256 _favoriteNumber) public {
         people.push(Person({favoriteNumber: _favoriteNumber, name: _name}));
         nameToFavoriteNumber[_name] = _favoriteNumber;
-    
+    }
 } 
