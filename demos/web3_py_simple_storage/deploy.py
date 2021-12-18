@@ -1,7 +1,11 @@
 # importing package solcx as solidity compiler
 from solcx import compile_standard, install_solc
 from web3 import Web3
+from dotenv import load_dotenv
 import json
+import os
+
+load_dotenv()
 
 # getting all the code from our SimpleStorage.sol and saving it in a variable
 with open("./SimpleStorage.sol", "r") as file:
@@ -43,15 +47,18 @@ abi = compiled_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["abi"]
 
 # connecting to ganache (with rpc server)
 w3 = Web3(Web3.HTTPProvider("HTTP://127.0.0.1:7545"))
-chain_id = 5777
-my_address = "0x2db7F5CFD87e7023cf71B69fBF3408f7076099Da"
+ganache_chain_id = 1337
+my_address = "0xa8385d19f193FDDB06710aF374977C38fD5aC63F"
 
 # adding a fake ganache private key to make our tests
-address_private_key = "0x8285a49cdbb4dcdee9273e8a3096a007f1112e6a04c2f103bc70b3296701e52e"  # when adding the private key in python, I allways have to use the 0x sintax as predicate (python will allways look for hex values)
+# address_private_key = "0x8285a49cdbb4dcdee9273e8a3096a007f1112e6a04c2f103bc70b3296701e52e"  # when adding the private key in python, I allways have to use the 0x sintax as predicate (python will allways look for hex values)
+address_private_key = os.getenv(
+    "LOCAL_PRIVATE_KEY"
+)  # Private key retrieved from .env file
 
 # create the contract with web3's python library (associating it to the ABI and BYTECODE)
 SimpleStorage = w3.eth.contract(abi=abi, bytecode=bytecode)
-print(SimpleStorage)
+# print(SimpleStorage)
 
 # Now, let's think about deploying properly. Whenever we make a state change on blockchain, we need to make a transaction. The deploy is a state change.
 # So, to make our deploy, we need to follow three steps:
@@ -65,18 +72,29 @@ print(SimpleStorage)
 
 # Get latest transaction number
 nonce = w3.eth.getTransactionCount(my_address)
-print(nonce)
+# print(nonce)
 
 # Building the transaction. Event that, in our file, we doesn't have a constructor, EVERY contract has one (like objects).
 transaction = SimpleStorage.constructor().buildTransaction(
     {
         "gasPrice": w3.eth.gas_price,
-        "chain_id": chain_id,
+        "chainId": ganache_chain_id,
         "from": my_address,
         "nonce": nonce,
     }
 )
-print(transaction)
+# print(transaction)
 
 # Now, we need to sign the transaction. Since we are doing from our address, our private key is the only that will work to sign it
-signed_txt = w3.eth.account.sign_transaction(transaction, address_private_key)
+signed_transaction = w3.eth.account.sign_transaction(
+    transaction, private_key=address_private_key
+)
+print(signed_transaction)
+
+# Send this transaction signed and wait for it to be acknowledge
+transaction_hash = w3.eth.send_raw_transaction(signed_transaction.rawTransaction)
+transaction_receipt = w3.eth.wait_for_transaction_receipt(transaction_hash)
+
+# Until here, we have the enought to deploy our contrac. Now, let's use the contract, aplying transactions and seeing how it
+# behaves on the blockchain.
+git
