@@ -5,7 +5,12 @@ from dotenv import load_dotenv
 import json
 import os
 
+# load library to deal with environment variables added to the .env file (that's not going to be uploaded in git due to .gitignore)
 load_dotenv()
+
+# clear console before execution
+clear_console = lambda: os.system("cls")
+clear_console()
 
 # getting all the code from our SimpleStorage.sol and saving it in a variable
 with open("./SimpleStorage.sol", "r") as file:
