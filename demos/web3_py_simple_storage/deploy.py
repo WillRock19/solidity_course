@@ -89,12 +89,48 @@ transaction = SimpleStorage.constructor().buildTransaction(
 signed_transaction = w3.eth.account.sign_transaction(
     transaction, private_key=address_private_key
 )
-print(signed_transaction)
+# print(signed_transaction)
+print("Deploying contract...")
 
 # Send this transaction signed and wait for it to be acknowledge
 transaction_hash = w3.eth.send_raw_transaction(signed_transaction.rawTransaction)
 transaction_receipt = w3.eth.wait_for_transaction_receipt(transaction_hash)
 
+print(f"Contract deployed to {transaction_receipt.contractAddress}")
+
 # Until here, we have the enought to deploy our contrac. Now, let's use the contract, aplying transactions and seeing how it
 # behaves on the blockchain.
-git
+
+deployed_simple_storage = w3.eth.contract(
+    address=transaction_receipt.contractAddress, abi=abi
+)
+print(
+    f"Initial Stored Value in contract: {deployed_simple_storage.functions.retrieve().call()}"
+)
+greeting_transaction = deployed_simple_storage.functions.store(15).buildTransaction(
+    {
+        "gasPrice": w3.eth.gas_price,
+        "chainId": ganache_chain_id,
+        "from": my_address,
+        "nonce": nonce + 1,
+    }
+)
+
+signed_greetings_transaction = w3.eth.account.sign_transaction(
+    greeting_transaction, private_key=address_private_key
+)
+
+greetings_transaction_hash = w3.eth.send_raw_transaction(
+    signed_greetings_transaction.rawTransaction
+)
+
+print("Updating stored value...")
+
+greetings_transaction_receipt = w3.eth.wait_for_transaction_receipt(
+    greetings_transaction_hash
+)
+
+print("Updated!")
+print(
+    f"New contract's stored value: {deployed_simple_storage.functions.retrieve().call()}"
+)
