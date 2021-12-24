@@ -103,8 +103,8 @@ transaction_receipt = w3.eth.wait_for_transaction_receipt(transaction_hash)
 
 print(f"Contract deployed to {transaction_receipt.contractAddress}")
 
-# Until here, we have the enought to deploy our contrac. Now, let's use the contract, aplying transactions and seeing how it
-# behaves on the blockchain.
+# Until here, we have the enought to deploy our contract.
+# Now, let's use the contract, aplying transactions and seeing how it behaves on the blockchain.
 
 deployed_simple_storage = w3.eth.contract(
     address=transaction_receipt.contractAddress, abi=abi
